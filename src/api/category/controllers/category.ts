@@ -1,7 +1,10 @@
-/**
- * category controller
- */
-
 import { factories } from '@strapi/strapi';
 
-export default factories.createCoreController('api::category.category');
+const controller = factories.createCoreController('api::category.category', ({ strapi }) => ({
+  async findAllWithPostCount(ctx) {
+    const data = await strapi.service('api::category.category').findAllWithPostCount(ctx);
+    ctx.body = { data };
+  },
+}));
+
+export default controller;
