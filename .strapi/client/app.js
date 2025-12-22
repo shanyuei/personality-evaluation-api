@@ -6,6 +6,7 @@ import ckeditor5 from "@_sh/strapi-plugin-ckeditor/strapi-admin";
 import strapiCloud from "@strapi/plugin-cloud/strapi-admin";
 import documentation from "@strapi/plugin-documentation/strapi-admin";
 import usersPermissions from "@strapi/plugin-users-permissions/strapi-admin";
+import generateData from "strapi-plugin-generate-data/strapi-admin";
 import { renderAdmin } from "@strapi/strapi/admin";
 
 import customisations from "../../src/admin/app.tsx";
@@ -18,5 +19,6 @@ renderAdmin(document.getElementById("strapi"), {
     "strapi-cloud": strapiCloud,
     documentation: documentation,
     "users-permissions": usersPermissions,
+    "generate-data": generateData,
   },
 });

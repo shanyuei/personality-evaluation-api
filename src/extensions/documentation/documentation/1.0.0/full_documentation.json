@@ -14,7 +14,7 @@
       "name": "Apache 2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "x-generation-date": "2025-12-21T17:27:32.909Z"
+    "x-generation-date": "2025-12-22T08:40:25.602Z"
   },
   "x-strapi-config": {
     "plugins": [
@@ -2514,9 +2514,6 @@
               "name": {
                 "type": "string"
               },
-              "slug": {
-                "type": "string"
-              },
               "posts": {
                 "type": "array",
                 "items": {
@@ -2530,6 +2527,9 @@
                   ],
                   "example": "string or id"
                 }
+              },
+              "slug": {
+                "type": "string"
               },
               "locale": {
                 "type": "string"
@@ -2599,9 +2599,6 @@
           "name": {
             "type": "string"
           },
-          "slug": {
-            "type": "string"
-          },
           "posts": {
             "type": "array",
             "items": {
@@ -2634,9 +2631,6 @@
                     "name": {
                       "type": "string"
                     },
-                    "slug": {
-                      "type": "string"
-                    },
                     "posts": {
                       "type": "array",
                       "items": {
@@ -2650,6 +2644,9 @@
                           }
                         }
                       }
+                    },
+                    "slug": {
+                      "type": "string"
                     },
                     "createdAt": {
                       "type": "string",
@@ -3013,6 +3010,9 @@
               }
             }
           },
+          "slug": {
+            "type": "string"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -3193,9 +3193,6 @@
                 "type": "string"
               },
               "name": {
-                "type": "string"
-              },
-              "slug": {
                 "type": "string"
               },
               "posts": {
@@ -3537,6 +3534,9 @@
                     }
                   }
                 }
+              },
+              "slug": {
+                "type": "string"
               },
               "createdAt": {
                 "type": "string",
