@@ -17,4 +17,10 @@ export default factories.createCoreController('api::post.post', ({ strapi }) => 
         const posts = await strapi.service('api::post.post').getNews5(ctx);
         ctx.body = { data: posts, };
     },
+    async incrementPreviewCount(ctx) {
+
+        const updatedPost = await strapi.service('api::post.post').incrementPreviewCount(ctx);
+
+        ctx.body = { data: updatedPost };
+    },
 }));

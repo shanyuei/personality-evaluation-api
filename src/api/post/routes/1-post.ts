@@ -9,6 +9,15 @@ export default {
                 auth: false, // 如需权限改成 true 或加 policy
             },
         },
+        // 增加预览次数
+        {
+            method: 'PUT',
+            path: '/post/increment-preview',
+            handler: 'post.incrementPreviewCount',
+            config: {
+                auth: false,
+            },
+        },
         // 获取最新的五条数据
         {
             method: 'GET',

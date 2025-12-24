@@ -11,16 +11,13 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         const filters: any = {
             recommend: true,
             category: {
-                $or: [
-
-                ]
             },
         };
         if (categoryId) {
-            filters.category.$or.push({ id: Number(categoryId) });
+            filters.category['id'] = Number(categoryId)
         }
         if (categorySlug) {
-            filters.category.$or.push({ slug: String(categorySlug).trim() });
+            filters.category['slug'] = String(categorySlug).trim()
         }
         let posts = await strapi.documents('api::post.post').findMany({
             locale,
@@ -29,6 +26,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
             sort: { publishedAt: 'desc' },
             limit: 5,
             populate: {
+                updatedBy: { fields: "*" },
                 cover: { fields: "*" },
                 category: { fields: "*" },
                 tags: { fields: "*" },
@@ -44,15 +42,14 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         const filters: any = {
             documentId: { $notIn: recommendPosts.map((p) => p.documentId) },
             category: {
-                $or: [
-                ]
+
             },
         };
         if (categoryId) {
-            filters.category.$or.push({ id: Number(categoryId) });
+            filters.category['id'] = Number(categoryId)
         }
         if (categorySlug) {
-            filters.category.$or.push({ slug: String(categorySlug).trim() });
+            filters.category['slug'] = String(categorySlug).trim()
         }
         const news5 = await strapi.documents('api::post.post').findMany({
             locale,
@@ -60,6 +57,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
             sort: { publishedAt: 'desc' },
             status: 'published',
             populate: {
+                     updatedBy: { fields: "*" },
                 cover: { fields: "*" },
                 category: { fields: "*" },
                 tags: { fields: "*" },
@@ -86,34 +84,33 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         const filters: any = {
             documentId: { $notIn: excludedIds },
             category: {
-                $or: [],
+
             },
             tags: {
-                $or: [],
+
             },
         };
         if (categoryId) {
-            filters.category.$or.push({ id: Number(categoryId) });
+            filters.category['id'] = Number(categoryId)
         }
         if (categorySlug) {
-            filters.category.$or.push({ slug: String(categorySlug).trim() });
+            filters.category['slug'] = String(categorySlug).trim()
         }
         if (tagSlug) {
-            filters.tags.$or.push({ slug: String(tagSlug).trim() });
+            filters.tags['slug'] = String(tagSlug).trim()
         }
-        
+
         const count = await strapi.documents('api::post.post').count({
             locale,
             filters,
         });
-        console.log('count',count);
-        console.log('filters',filters);
         const posts = await strapi.documents('api::post.post').findMany({
             locale,
             filters,
             sort: { previewCount: 'desc', publishedAt: 'desc' },
             status: 'published',
             populate: {
+                     updatedBy: { fields: "*" },
                 cover: { fields: "*" },
                 category: { fields: "*" },
                 tags: { fields: "*" },
@@ -131,5 +128,38 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         };
     },
 
+    /**
+     * 增加文章预览次数
+     * PUT /api/posts/:slug/increment-preview
+     */
+    async incrementPreviewCount(ctx) {
 
+
+        const locale = ctx.request.query.locale || 'zh-Hans';
+        const { slug } = ctx.request.query;
+        const posts = await strapi.documents('api::post.post').findMany({
+            filters: { slug },
+            locale,
+            fields: ['documentId', 'previewCount'],
+            limit: 1,
+        });
+
+        if (!posts || posts.length === 0) {
+            return null;
+        }
+        console.log('incrementPreviewCount', posts);
+        const post = posts[0];
+        const newCount = (post.previewCount ? Number(post.previewCount) : 0) + 1;
+
+        const updatedPost = await strapi.documents('api::post.post').update({
+            documentId: post.documentId,
+            locale,
+            status: 'published',
+            data: {
+                previewCount: newCount,
+            },
+        });
+
+        return updatedPost;
+    },
 }));
