@@ -3,24 +3,31 @@
  */
 
 import { factories } from '@strapi/strapi';
-
 export default factories.createCoreService('api::post.post', ({ strapi }) => ({
     // 1. 取出最新 5 条「已发布 + 推荐」的 documentId
-    async findTop5Tags(ctx) {
-        let locale = ctx.request.query.locale || 'zh-Hans';
-
-        // 1. 取出最新 5 条「已发布 + 推荐」的 documentId
-        const top5 = await strapi.documents('api::post.post').findMany({
+    async topRecommended(ctx) {
+     
+        return [];
+    },
+    // 获取最新的五条数据
+    async getNews5(ctx) {
+        const locale = ctx.request.query.locale || 'zh-Hans';
+        // 获取推荐的数据 方便去重
+        const recommendPosts = await this.topRecommended(ctx);
+        // 2. 取出最新 5 条「已发布」的 documentId
+        const news5 = await strapi.documents('api::post.post').findMany({
             locale,
             filters: {
-                recommend: true,
                 publishedAt: { $notNull: true },
+                // 推荐的文章不包含在最新 5 条中
+                documentId: { $notIn: recommendPosts.map((p) => p.documentId) },
             },
             sort: { publishedAt: 'desc' },
             limit: 5,
         });
-        return top5;
+        return news5;
     },
+
     /**
       * 获取「刨掉最新 5 条推荐」的文章列表
       * GET /api/posts/except-top-recommended
@@ -35,7 +42,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         // } = ctx.query;
         let locale = ctx.request.query.locale || 'zh-Hans';
         let { page = 1, pageSize = 20 } = ctx.request.query.pagination || {};
-        const top5 = await this.findTop5Tags(ctx);
+        const top5 = await this.topRecommended(ctx);
         const excludedIds = top5.map((p) => p.documentId);
 
         // 2. 查「之外」的文章并分页

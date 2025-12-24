@@ -1,5 +1,23 @@
 export default {
     routes: [
+        // 获取推荐的文章
+        {
+            method: 'GET',
+            path: '/post/top-recommended',
+            handler: 'post.topRecommended',
+            config: {
+                auth: false, // 如需权限改成 true 或加 policy
+            },
+        },
+        // 获取最新的五条数据
+        {
+            method: 'GET',
+            path: '/post/news-5',
+            handler: 'post.getNews5',
+            config: {
+                auth: false, // 如需权限改成 true 或加 policy
+            },
+        },
         {
             method: 'GET',
             path: '/post/except-top-recommended-all', // 想叫什么随意
@@ -8,21 +26,7 @@ export default {
                 auth: false, // 如需权限改成 true 或加 policy
             },
         },
-        {
-            method: 'GET',
-            path: '/post/top-recommended', // 想叫什么随意
-            handler: 'post.findTop5Tags',
-            config: {
-                auth: false, // 如需权限改成 true 或加 policy
-            },
-        },
-        {
-            method: 'GET',
-            path: '/post/top-preview-count',
-            handler: 'post.findTop5ByPreviewCount',
-            config: {
-              auth: false, // 如需权限改成 true 或加 policy
-            },
-        }
+
+
     ],
 };
