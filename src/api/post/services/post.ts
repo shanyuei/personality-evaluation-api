@@ -4,78 +4,123 @@
 
 import { factories } from '@strapi/strapi';
 export default factories.createCoreService('api::post.post', ({ strapi }) => ({
-    // 1. 取出最新 5 条「已发布 + 推荐」的 documentId
+    // 1. 取出最新 5 条「已发布 + 推荐 + 可以根据参数进行分类筛选和多语言筛选」的
     async topRecommended(ctx) {
-     
-        return [];
+        const locale = ctx.request.query.locale || 'zh-Hans';
+        const { categoryId, categorySlug } = ctx.request.query;
+        const filters: any = {
+            recommend: true,
+            category: {
+                $or: [
+
+                ]
+            },
+        };
+        if (categoryId) {
+            filters.category.$or.push({ id: Number(categoryId) });
+        }
+        if (categorySlug) {
+            filters.category.$or.push({ slug: String(categorySlug).trim() });
+        }
+        let posts = await strapi.documents('api::post.post').findMany({
+            locale,
+            filters,
+            status: 'published',
+            sort: { publishedAt: 'desc' },
+            limit: 5,
+            populate: {
+                cover: { fields: "*" },
+                category: { fields: "*" },
+                tags: { fields: "*" },
+            },
+        });
+        return posts;
     },
-    // 获取最新的五条数据
+    // 获取最新的五条数据 并且 要排除 推荐的文章
     async getNews5(ctx) {
         const locale = ctx.request.query.locale || 'zh-Hans';
-        // 获取推荐的数据 方便去重
         const recommendPosts = await this.topRecommended(ctx);
-        // 2. 取出最新 5 条「已发布」的 documentId
+        const { categorySlug, categoryId } = ctx.request.query;
+        const filters: any = {
+            documentId: { $notIn: recommendPosts.map((p) => p.documentId) },
+            category: {
+                $or: [
+                ]
+            },
+        };
+        if (categoryId) {
+            filters.category.$or.push({ id: Number(categoryId) });
+        }
+        if (categorySlug) {
+            filters.category.$or.push({ slug: String(categorySlug).trim() });
+        }
         const news5 = await strapi.documents('api::post.post').findMany({
             locale,
-            filters: {
-                publishedAt: { $notNull: true },
-                // 推荐的文章不包含在最新 5 条中
-                documentId: { $notIn: recommendPosts.map((p) => p.documentId) },
-            },
+            filters,
             sort: { publishedAt: 'desc' },
+            status: 'published',
+            populate: {
+                cover: { fields: "*" },
+                category: { fields: "*" },
+                tags: { fields: "*" },
+            },
             limit: 5,
         });
         return news5;
     },
 
     /**
-      * 获取「刨掉最新 5 条推荐」的文章列表
+      * 获取除了最新的五条和 推荐的五条之外的数据，并且 根据 浏览总数排序
       * GET /api/posts/except-top-recommended
       */
     async exceptTopRecommended(ctx) {
-        // const {
-        //     locale = 'zh-Hans',
-        //     pagination: {
-        //         page = 1,
-        //         pageSize = 20,
-        //     }
-        // } = ctx.query;
-        let locale = ctx.request.query.locale || 'zh-Hans';
-        let { page = 1, pageSize = 20 } = ctx.request.query.pagination || {};
+        const locale = ctx.request.query.locale || 'zh-Hans';
+        const { page = 1, pageSize = 20 } = ctx.request.query.pagination || {};
+        const { categorySlug, categoryId, tagSlug } = ctx.request.query;
         const top5 = await this.topRecommended(ctx);
-        const excludedIds = top5.map((p) => p.documentId);
-
-        // 2. 查「之外」的文章并分页
+        const news5 = await this.getNews5(ctx);
+        const excludedIds = [
+            ...top5.map((p) => p.documentId),
+            ...news5.map((p) => p.documentId),
+        ];
+        const filters: any = {
+            documentId: { $notIn: excludedIds },
+            category: {
+                $or: [],
+            },
+            tags: {
+                $or: [],
+            },
+        };
+        if (categoryId) {
+            filters.category.$or.push({ id: Number(categoryId) });
+        }
+        if (categorySlug) {
+            filters.category.$or.push({ slug: String(categorySlug).trim() });
+        }
+        if (tagSlug) {
+            filters.tags.$or.push({ slug: String(tagSlug).trim() });
+        }
+        
         const count = await strapi.documents('api::post.post').count({
             locale,
-            filters: {
-                // 如果 top5 不足 5 条，$notIn: [] 会被框架忽略，等价于无过滤
-                documentId: { $notIn: excludedIds },
-            },
-            sort: { publishedAt: 'desc' },
-            populate: {
-                cover: { fields: ['url'] },
-                category: { fields: ['name'] },
-                tags: { fields: ['name', 'slug'] },
-            },
-
+            filters,
         });
+        console.log('count',count);
+        console.log('filters',filters);
         const posts = await strapi.documents('api::post.post').findMany({
             locale,
-            filters: {
-                // 如果 top5 不足 5 条，$notIn: [] 会被框架忽略，等价于无过滤
-                documentId: { $notIn: excludedIds },
-            },
-            sort: { publishedAt: 'desc' },
+            filters,
+            sort: { previewCount: 'desc', publishedAt: 'desc' },
+            status: 'published',
             populate: {
-                cover: { fields: ['url'] },
-                category: { fields: ['name'] },
-                tags: { fields: ['name', 'slug'] },
+                cover: { fields: "*" },
+                category: { fields: "*" },
+                tags: { fields: "*" },
             },
             limit: Number(pageSize),
             start: (Number(page) - 1) * Number(pageSize),
         });
-
         return {
             posts,
             meta: {
@@ -86,24 +131,5 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         };
     },
 
-    /**
-      * 获取预览量前五的文章
-      * GET /api/posts/top-preview-count
-      */
-    async findTop5ByPreviewCount(ctx) {
-        let locale = ctx.request.query.locale || 'zh-Hans';
-        const top5 = await strapi.documents('api::post.post').findMany({
-            locale,
-            filters: {
-            },
-            limit: 5,
-            populate: {
-                cover: { fields: ['url'] },
-                category: { fields: ['name'] },
-                tags: { fields: ['name', 'slug'] },
-            },
-        });
 
-        return top5;
-    },
 }));

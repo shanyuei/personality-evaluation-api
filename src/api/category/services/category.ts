@@ -13,6 +13,7 @@ const service = factories.createCoreService('api::category.category', ({ strapi 
             locale: ctx.request.query.locale,
             limit: count,
             start: 0,
+            status: 'published',
         });
         return categories
     },
