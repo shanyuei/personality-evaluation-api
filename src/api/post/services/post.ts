@@ -57,7 +57,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
             sort: { publishedAt: 'desc' },
             status: 'published',
             populate: {
-                     updatedBy: { fields: "*" },
+                updatedBy: { fields: "*" },
                 cover: { fields: "*" },
                 category: { fields: "*" },
                 tags: { fields: "*" },
@@ -99,7 +99,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
         if (tagSlug) {
             filters.tags['slug'] = String(tagSlug).trim()
         }
-
+        console.log('exceptTopRecommended', filters);
         const count = await strapi.documents('api::post.post').count({
             locale,
             filters,
@@ -110,7 +110,7 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
             sort: { previewCount: 'desc', publishedAt: 'desc' },
             status: 'published',
             populate: {
-                     updatedBy: { fields: "*" },
+                updatedBy: { fields: "*" },
                 cover: { fields: "*" },
                 category: { fields: "*" },
                 tags: { fields: "*" },

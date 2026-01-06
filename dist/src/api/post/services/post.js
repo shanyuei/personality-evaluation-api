@@ -92,6 +92,7 @@ exports.default = strapi_1.factories.createCoreService('api::post.post', ({ stra
         if (tagSlug) {
             filters.tags['slug'] = String(tagSlug).trim();
         }
+        console.log('exceptTopRecommended', filters);
         const count = await strapi.documents('api::post.post').count({
             locale,
             filters,

@@ -8,6 +8,9 @@ export default factories.createCoreController('api::post.post', ({ strapi }) => 
     async exceptTopRecommended(ctx) {
         const { posts, meta } = await strapi.service('api::post.post').exceptTopRecommended(ctx);
         ctx.body = { data: posts, meta: meta, query: ctx.request.query };
+        // ctx.body = { data: [], meta: {
+        //     ttt:"111"
+        // }, query: ctx.request.query };
     },
     async topRecommended(ctx) {
         const posts = await strapi.service('api::post.post').topRecommended(ctx);
