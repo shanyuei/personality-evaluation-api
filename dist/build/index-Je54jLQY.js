@@ -1,0 +1,1 @@
+import{y as s,z as t,cc as o,cd as u}from"./strapi-Coydjvtv.js";function m(a,e){s(2,arguments);var r=t(a),n=t(e);return r.getTime()>n.getTime()}function d(a,e){s(2,arguments);var r=u(e);return o(a,-r)}export{m as i,d as s};
