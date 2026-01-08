@@ -478,6 +478,7 @@ export interface ApiPostPost extends Struct.CollectionTypeSchema {
   };
   options: {
     draftAndPublish: true;
+    populate: ['cover', 'category', 'tags', 'updatedBy', 'createdBy'];
   };
   pluginOptions: {
     i18n: {

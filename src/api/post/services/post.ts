@@ -162,4 +162,5 @@ export default factories.createCoreService('api::post.post', ({ strapi }) => ({
 
         return updatedPost;
     },
+
 }));

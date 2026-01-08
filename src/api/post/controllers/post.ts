@@ -26,4 +26,41 @@ export default factories.createCoreController('api::post.post', ({ strapi }) => 
 
         ctx.body = { data: updatedPost };
     },
+
+
+    async find(ctx) {
+        // 1. 拼装 populate（白名单）
+        const pop = (ctx.query.populate as any) || {};
+        const populate = {
+            ...pop,
+            cover: pop.cover ?? true,
+            category: pop.category ?? true,
+            tags: pop.tags ?? true,
+            updatedBy: pop.updatedBy ?? true,
+            createdBy: pop.createdBy ?? true,
+        };
+
+        // 2. 分页参数
+        const { page = 1, pageSize = 25 } = (ctx.query.pagination as any) || {};
+        const start = (Number(page) - 1) * Number(pageSize);
+        const limit = Number(pageSize);
+
+        // 3. 查总数 + 当前页
+        const [total, results] = await Promise.all([
+            strapi.documents('api::post.post').count({ ...ctx.query, populate, status: 'published' }),
+            strapi.documents('api::post.post').findMany({
+                ...ctx.query,
+                populate,
+                status: 'published',
+                limit,
+                start,
+            }),
+        ]);
+
+        // 4. 保持 REST 格式
+        ctx.body = {
+            data: results,
+            meta: { pagination: { page, pageSize: limit, total } },
+        };
+    },
 }));

@@ -6,8 +6,9 @@
     "pluralName": "posts",
     "displayName": "post"
   },
-  "options": {
-    "draftAndPublish": true
+ "options": {
+    "draftAndPublish": true,
+    "populate": ["cover", "category", "tags", "updatedBy", "createdBy"]
   },
   "pluginOptions": {
     "i18n": {
